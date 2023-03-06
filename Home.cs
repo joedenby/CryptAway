@@ -1,4 +1,6 @@
-﻿namespace CryptAway
+﻿using System.Text;
+
+namespace CryptAway
 {
     internal class Home
     {
@@ -22,7 +24,7 @@
             }
             else if (!signedIn) {
                 Message.Log("Enter password:");
-                var pass = Console.ReadLine();
+                var pass = GetHiddenConsoleInput();
                 signedIn = Encryption.CheckPassword(pass);
                 if (!signedIn)
                 {
@@ -70,6 +72,20 @@
                 Message.LogError("Unknown command: " + commandName);
                 Start();
             }
+        }
+
+        public static string GetHiddenConsoleInput()
+        {
+            Message.LogError("Input will not be visible.");
+            StringBuilder input = new StringBuilder();
+            while (true)
+            {
+                var key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.Enter) break;
+                if (key.Key == ConsoleKey.Backspace && input.Length > 0) input.Remove(input.Length - 1, 1);
+                else if (key.Key != ConsoleKey.Backspace) input.Append(key.KeyChar);
+            }
+            return input.ToString();
         }
 
         private static void BuildCommandDictionary() {
@@ -313,17 +329,15 @@
             string response = string.Empty;
             if (Encryption.HasPassword())
             {
-                Message.LogError("Password already set.");
                 Message.Log($"Input current password to change it.");
-
-                response = Console.ReadLine();
+                response = Home.GetHiddenConsoleInput();
                 if (!string.IsNullOrWhiteSpace(response) && Encryption.CheckPassword(response))
                 {
                     Message.Log("New password:");
-                    response = Console.ReadLine();
+                    response = Home.GetHiddenConsoleInput();
                     Message.Log("Confirm password:");
                     string previous = response;
-                    response = Console.ReadLine();
+                    response = Home.GetHiddenConsoleInput();
                     if (response.Equals(previous))
                     {
                         Encryption.EncryptPassword(response);
@@ -347,10 +361,9 @@
             // Set new password
             Message.LogError("No password has been set.");
             Message.Log("Enter password:");
-            response = Console.ReadLine();
-            string pass = response;
+            string pass = Home.GetHiddenConsoleInput();
             Message.Log("Confirm password:");
-            response = Console.ReadLine();
+            response = Home.GetHiddenConsoleInput();
             if (response.Equals(pass))
             {
                 Encryption.EncryptPassword(response);
